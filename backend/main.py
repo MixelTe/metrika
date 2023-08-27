@@ -1,9 +1,12 @@
 from flask import Flask, Response, abort, g, jsonify, make_response, redirect, request, send_from_directory
 from flask_jwt_extended import JWTManager
 from data import db_session
+from blueprints.docs import blueprint as blueprint_docs
 from blueprints.authentication import blueprint as blueprint_authentication
 from blueprints.api import blueprint as blueprint_api
+from blueprints.app import blueprint as blueprint_app
 from data import User
+from data.init_values import init_values
 from utils import get_json, get_jwt_secret_key, randstr
 from logger import setLogging
 import logging
@@ -26,11 +29,16 @@ is_admin_default = False
 def main():
     if not os.path.exists("db"):
         os.makedirs("db")
-    db_session.global_init("db/TicketSystem.db")
+    new_bd = not os.path.exists("db/Metrika.db")
+    db_session.global_init("db/Metrika.db")
+    if new_bd:
+        init_values()
     if "dev" not in sys.argv:
         check_is_admin_default()
+    app.register_blueprint(blueprint_docs)
     app.register_blueprint(blueprint_authentication)
     app.register_blueprint(blueprint_api)
+    app.register_blueprint(blueprint_app)
     if __name__ == "__main__":
         print("Starting")
         app.run(debug=True)

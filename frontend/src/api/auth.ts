@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "react-query";
 import fetchPost from "../utils/fetchPost"
-import ApiError from "./apiError";
-import { ResponseMsg, User } from "./dataTypes";
+import { ResponseMsg } from "./dataTypes";
+import { User } from "./user";
 
 export function useMutationAuth(onError?: (msg: string) => void)
 {
@@ -12,10 +12,7 @@ export function useMutationAuth(onError?: (msg: string) => void)
 		{
 			queryClient.setQueryData("user", () => data);
 		},
-		onError: (error) =>
-		{
-			onError?.(error instanceof ApiError ? error.message : "Произошла ошибка, попробуйте ещё раз");
-		}
+		onError,
 	});
 	return mutation;
 }
@@ -24,7 +21,7 @@ async function postAuth(authData: AuthData)
 {
 	const res = await fetchPost("/api/auth", authData);
 	const data = await res.json();
-	if (!res.ok) throw new ApiError((data as ResponseMsg).msg);
+	if (!res.ok) throw (data as ResponseMsg).msg;
 
 	const user = data as User;
 	user.auth = true;

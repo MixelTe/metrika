@@ -6,7 +6,7 @@ def add_user(login, password, name, roleId):
     from data import db_session
     from data import User
 
-    db_session.global_init("db/TicketSystem.db" if "dev" in sys.argv else None)
+    db_session.global_init("db/Metrika.db")
     user = User(login=login, name=name, roleId=roleId)
     user.set_password(password)
 

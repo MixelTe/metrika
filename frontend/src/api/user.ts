@@ -1,10 +1,18 @@
 import { useQuery } from "react-query";
-import ApiError from "./apiError";
-import { ResponseMsg, User } from "./dataTypes";
+import { ResponseMsg } from "./dataTypes";
 
 export default function useUser()
 {
 	return useQuery("user", getUser);
+}
+
+export interface User
+{
+	auth: boolean,
+	id: number,
+	name: string,
+	login: string,
+	operations: string[],
 }
 
 async function getUser(): Promise<User>
@@ -13,7 +21,7 @@ async function getUser(): Promise<User>
 	const data = await res.json();
 
 	if (res.status == 401) return { auth: false, id: -1, login: "", name: "", operations: [] };
-	if (!res.ok) throw new ApiError((data as ResponseMsg).msg);
+	if (!res.ok) throw (data as ResponseMsg).msg;
 
 	const user = data as User;
 	user.auth = true;

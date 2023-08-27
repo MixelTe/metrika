@@ -6,7 +6,7 @@ def change_user_password(login, password):
     from data import db_session
     from data import User
 
-    db_session.global_init("db/TicketSystem.db" if "dev" in sys.argv else None)
+    db_session.global_init("db/Metrika.db")
     session = db_session.create_session()
     user: User = session.query(User).filter(User.login == login).first()
     if user is None:

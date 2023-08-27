@@ -1,10 +1,10 @@
 import { UseQueryResult } from "react-query";
-import { User } from "./dataTypes";
-import useUser from "./user";
+import useUser, { User } from "./user";
 
 const Operations = {
-	view: "view",
-	write: "write",
+	view_app: "view_app",
+	add_app: "add_app",
+	edit_app: "edit_app",
 }
 
 export type Operation = keyof typeof Operations;
