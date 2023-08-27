@@ -2,9 +2,13 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import { ResponseMsg } from "./dataTypes";
 import fetchPost from "../utils/fetchPost";
 
-export default function useApps()
+export function useApps()
 {
 	return useQuery("apps", getApps);
+}
+export function useApp(appId: number | string)
+{
+	return useQuery(["app", `${appId}`], () => getApp(appId));
 }
 export function useMutationNewApp()
 {
@@ -22,14 +26,14 @@ export function useMutationNewApp()
 
 export interface App
 {
-    id: number,
-    code: string,
-    name: string,
+	id: number,
+	code: string,
+	name: string,
 }
 
 export interface NewAppData
 {
-    name: string,
+	name: string,
 }
 
 async function getApps(): Promise<App[]>
@@ -39,6 +43,15 @@ async function getApps(): Promise<App[]>
 	if (!res.ok) throw (data as ResponseMsg).msg;
 
 	return data as App[];
+}
+
+async function getApp(appId: number | string): Promise<App>
+{
+	const res = await fetch("/api/app/" + appId);
+	const data = await res.json();
+	if (!res.ok) throw (data as ResponseMsg).msg;
+
+	return data as App;
 }
 
 async function postNewApp(appData: NewAppData)

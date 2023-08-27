@@ -24,10 +24,13 @@ class User(SqlAlchemyBase, SerializerMixin):
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
-    def check_permission(self, operation):
+    def check_permission(self, operation, objectId=None):
         for permission in self.permissions:
             if permission.operation == operation:
-                return True
+                if objectId is None:
+                    return True
+                if permission.objectId == objectId:
+                    return True
         return False
 
     def get_creation_changes(self):
@@ -42,5 +45,5 @@ class User(SqlAlchemyBase, SerializerMixin):
             "id": self.id,
             "name": self.name,
             "login": self.login,
-            "operations": list(map(lambda v: v.operation, self.permissions)),
+            "operations": list(map(lambda v: v.to_string(), self.permissions)),
         }

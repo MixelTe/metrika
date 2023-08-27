@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Boolean, Column, DefaultClause, Integer, String
 from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.orm import Session
 from ..db_session import SqlAlchemyBase
@@ -8,9 +8,10 @@ from utils import randstr
 class App(SqlAlchemyBase, SerializerMixin):
     __tablename__ = "App"
 
-    id   = Column(Integer, primary_key=True, autoincrement=True, unique=True)
-    name = Column(String(8), nullable=False)
-    code = Column(String(8), nullable=False)
+    id      = Column(Integer, primary_key=True, autoincrement=True, unique=True)
+    deleted = Column(Boolean, DefaultClause("0"), nullable=False)
+    name    = Column(String(8), nullable=False)
+    code    = Column(String(8), nullable=False)
 
     def __repr__(self):
         return f"<App> [{self.id}] {self.name}"

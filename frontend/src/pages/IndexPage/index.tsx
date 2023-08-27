@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useHasPermission } from "../../api/operations";
 import Layout from "../../components/Layout";
-import useApps, { useMutationNewApp } from "../../api/app";
+import { useApps, useMutationNewApp } from "../../api/app";
 import Popup from "../../components/Popup";
 import Spinner from "../../components/Spinner";
 

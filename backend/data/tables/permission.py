@@ -23,6 +23,11 @@ class Permission(SqlAlchemyBase, SerializerMixin):
     def get_creation_changes(self):
         return []
 
+    def to_string(self):
+        if self.objectId > 0:
+            return f"{self.operation}-{self.objectId}"
+        return self.operation
+
     @staticmethod
     def new(db_sess: Session, user_id: int, operation: str, objectId: int):
         permission = Permission(userId=user_id, operation=operation, objectId=objectId)

@@ -15,7 +15,7 @@ blueprint = Blueprint("app", __name__)
 @use_user()
 def apps(db_sess: Session, user: User):
     app_ids = map(lambda v: v.objectId, filter(lambda v: v.operation == Operations.view_app, user.permissions))
-    apps = db_sess.query(App).filter(App.id.in_(app_ids)).all()
+    apps = db_sess.query(App).filter(App.id.in_(app_ids), App.deleted == False).all()
 
     return jsonify(list(map(lambda v: v.get_dict(), apps))), 200
 
@@ -45,4 +45,14 @@ def add_app(db_sess: Session, user: User):
         (Actions.added, Tables.Permission, permission_edit),
     ])
 
+    return jsonify(app.get_dict()), 200
+
+
+@blueprint.route("/api/app/<int:app_id>")
+@jwt_required()
+@use_db_session()
+@use_user()
+@permission_required(Operations.view_app, "app_id")
+def app(db_sess: Session, user: User, app_id: int):
+    app = db_sess.query(App).filter(App.id == app_id).first()
     return jsonify(app.get_dict()), 200

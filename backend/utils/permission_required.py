@@ -3,7 +3,7 @@ from data import User
 from functools import wraps
 
 
-def permission_required(operation):
+def permission_required(operation, objectIdField=None):
     def wrapper(fn):
         @wraps(fn)
         def decorator(*args, **kwargs):
@@ -12,8 +12,10 @@ def permission_required(operation):
             else:
                 return jsonify({"msg": "permission_required: no user"}), 500
 
-            if not user.check_permission(operation):
+            objectId = kwargs[objectIdField] if objectIdField is not None else None
+            if not user.check_permission(operation, objectId):
                 return jsonify({"msg": "No permission"}), 403
+            
             return fn(*args, **kwargs)
 
         return decorator
