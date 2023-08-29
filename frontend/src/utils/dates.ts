@@ -6,6 +6,12 @@ export function dateToString(date: Date | null | undefined)
 	return `${padNum(date.getDate(), 2)}.${padNum(date.getMonth() + 1, 2)}.${date.getFullYear()}`;
 }
 
+export function dateToInptValue(date: Date | null | undefined)
+{
+	if (!date) return "";
+	return `${date.getFullYear()}-${padNum(date.getMonth() + 1, 2)}-${padNum(date.getDate(), 2)}`;
+}
+
 export function timeToString(date: Date, seconds = false)
 {
 	let dateStr = `${padNum(date.getHours(), 2)}:${padNum(date.getMinutes(), 2)}`;
@@ -16,6 +22,11 @@ export function timeToString(date: Date, seconds = false)
 export function datetimeToString(date: Date, seconds = false)
 {
 	return dateToString(date) + " " + timeToString(date, seconds);
+}
+
+export function datetimeToISO(date: Date, seconds = false)
+{
+	return dateToInptValue(date) + "T" + timeToString(date, seconds);
 }
 
 export function relativeDate(date: Date, nowBreak: "second" | "minute" | "hour" | "day" = "second")

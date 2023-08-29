@@ -1,0 +1,21 @@
+.root {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.5em;
+	padding: 1em 2em;
+	border: 1px solid lightgray;
+	border-radius: 0.2em;
+}
+
+.hov {
+	height: 1em;
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+}
+.desc {
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+}

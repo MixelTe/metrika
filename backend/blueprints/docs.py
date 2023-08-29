@@ -7,6 +7,11 @@ blueprint = Blueprint("docs", __name__)
 @blueprint.route("/api")
 def docs():
     return jsonify({
+        "/api/script": {
+            "__desc__": "Get script for web app",
+            "__perm__": "None",
+            "response": "js script",
+        },
         "/api/auth POST": {
             "__desc__": "Get auth cookie",
             "__perm__": "None",

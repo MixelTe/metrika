@@ -1,5 +1,7 @@
 from sqlalchemy import Column, DateTime, Integer, String
 from sqlalchemy_serializer import SerializerMixin
+from sqlalchemy.orm import Session
+from utils import get_datetime_now
 from ..db_session import SqlAlchemyBase
 
 
@@ -15,5 +17,11 @@ class Event(SqlAlchemyBase, SerializerMixin):
     def __repr__(self):
         return f"<Event> [{self.id}] {self.date} {self.actionCode}"
 
-    # def get_dict(self):
-    #     return self.to_dict(only=("name"))
+    @staticmethod
+    def new(db_sess: Session, actionCode, appCode, appUserId):
+        event = Event(date=get_datetime_now(), actionCode=actionCode, appCode=appCode, appUserId=appUserId)
+        db_sess.add(event)
+        return event
+
+    def get_dict(self):
+        return self.to_dict(only=("id", "date", "actionCode", "appUserId"))

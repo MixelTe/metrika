@@ -55,4 +55,6 @@ def add_app(db_sess: Session, user: User):
 @permission_required(Operations.view_app, "app_id")
 def app(db_sess: Session, user: User, app_id: int):
     app = db_sess.query(App).filter(App.id == app_id).first()
+    if app is None:
+        return jsonify({"msg": f"app with id [{app_id}] not found"}), 400
     return jsonify(app.get_dict()), 200
