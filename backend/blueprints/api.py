@@ -1,12 +1,14 @@
+from datetime import timedelta
 from uuid import uuid4
-from flask import Blueprint, jsonify, make_response, request
+from flask import Blueprint, g, jsonify, make_response, request, url_for
 from flask_jwt_extended import jwt_required
 from sqlalchemy.orm import Session
-from utils import use_db_session, use_user
+from utils import get_datetime_now, get_json_values, load_file, parse_int, use_db_session, use_user
 from data import User, Event
 
 
 blueprint = Blueprint("api", __name__)
+script_js = load_file("static/script.js")
 
 
 @blueprint.route("/api/user")
@@ -35,9 +37,49 @@ def script(db_sess: Session):
     user_agent = request.user_agent.string
     is_desktop = "Mobi" not in user_agent
 
-    Event.new(db_sess, "open", app_code, appUserId, isNew, remote_addr, language, user_agent, is_desktop)
+    event = Event.new(db_sess, "open", app_code, appUserId, isNew, remote_addr, language, user_agent, is_desktop)
     db_sess.commit()
 
-    res = make_response()
+    script_js = load_file("static/script.js")  # dev
+    res = script_js
+    res = res.replace("\"%eventId%\"", str(event.id))
+    res = res.replace("\"%url%\"", '"' + url_for("docs.docs", _external=True) + '"')
+    res = make_response(res)
     res.set_cookie("userId", appUserId, max_age=31536000, samesite="None", secure=True)
     return res
+
+
+@blueprint.route("/api/script/onopen", methods=["OPTIONS"])
+def script_onopen_options():
+    g.no_cors = True
+    return "ok"
+
+
+@blueprint.route("/api/script/onopen", methods=["POST"])
+@use_db_session()
+def script_onopen(db_sess: Session):
+    g.no_cors = True
+
+    data, is_json = g.json
+    if not is_json:
+        return jsonify({"msg": "body is not json"}), 415
+
+    (event_id, from_tag), values_error = get_json_values(data, "eventId", "fromTag")
+
+    if values_error:
+        return jsonify({"msg": values_error}), 400
+
+    appUserId = request.cookies.get("userId", None)
+
+    if type(event_id) != int or event_id < 0 or appUserId is None:
+        return jsonify({"msg": "wrong eventId"}), 400
+
+    event = db_sess.query(Event).filter(Event.id == event_id, Event.appUserId == appUserId).first()
+
+    now = get_datetime_now().replace(tzinfo=None)
+    if event is None or now - event.date > timedelta(minutes=5):
+        return jsonify({"msg": "wrong eventId"}), 400
+
+    event.fromTag = from_tag
+    db_sess.commit()
+    return jsonify({"msg": "ok"}), 200

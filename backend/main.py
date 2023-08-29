@@ -23,6 +23,7 @@ app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
 app.config["JWT_SECRET_KEY"] = get_jwt_secret_key()
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = False
 app.config["JWT_COOKIE_CSRF_PROTECT"] = False
+app.config["JWT_COOKIE_SAMESITE"] = "Lax"
 
 jwt_manager = JWTManager(app)
 is_admin_default = False
@@ -58,6 +59,7 @@ def check_is_admin_default():
 def before_request():
     g.json = get_json(request)
     g.req_id = randstr(4)
+    g.no_cors = False
     if request.path.startswith("/api"):
         try:
             if (g.json[1]):
@@ -88,6 +90,11 @@ def after_request(response: Response):
             logging.info(f"Response;{response.status_code};{response.data}")
         except Exception as x:
             logging.info(f"Response;;logging error {x}")
+    if g.no_cors:
+        response.headers.add("Access-Control-Allow-Origin", request.origin)
+        response.headers.add("Access-Control-Allow-Methods", "GET, POST")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type, *")
+        response.headers.add("Access-Control-Allow-Credentials", "true")
     return response
 
 

@@ -18,6 +18,7 @@ class Event(SqlAlchemyBase, SerializerMixin):
     language    = Column(String(96), DefaultClause(""), nullable=False)
     user_agent  = Column(String(160), DefaultClause(""), nullable=False)
     is_desktop  = Column(Boolean, DefaultClause("1"), nullable=False)
+    fromTag     = Column(String(64), DefaultClause(""), nullable=False)
 
     def __repr__(self):
         return f"<Event> [{self.id}] {self.date} {self.actionCode}"

@@ -9,3 +9,4 @@ from utils.randstr import randstr
 from utils.parse_date import parse_date
 from utils.switch_value import switch_value
 from utils.parse_int import parse_int
+from utils.load_file import load_file
