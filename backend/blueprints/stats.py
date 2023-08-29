@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required
 from sqlalchemy import text
 from sqlalchemy.orm import Session
-from utils import get_datetime_now, parse_date, permission_required, switch_value, use_db_session, use_user
+from utils import get_datetime_now, parse_date, parse_int, permission_required, switch_value, use_db_session, use_user
 from data import User, Operations, App
 
 
@@ -20,6 +20,10 @@ def stats(db_sess: Session, user: User, app_id: int):
     if app is None:
         return jsonify({"msg": f"app with id [{app_id}] not found"}), 400
 
+    only_new, _ = parse_int(request.args.get("new", None))
+    if only_new != 1:
+        only_new = 0
+
     group = request.args.get("group", "minute")
     divider = switch_value(group, [
         ("day", 24 * 60 * 60),
@@ -27,8 +31,8 @@ def stats(db_sess: Session, user: User, app_id: int):
         ("minute", 10 * 60),
     ])
 
-    visit_time = request.args.get("visitTime", None)
-    if type(visit_time) != int or visit_time < 10:
+    visit_time, is_int = parse_int(request.args.get("visitTime", None))
+    if not is_int or visit_time < 10:
         visit_time = 10
 
     end, is_date = parse_date(request.args.get("end", None))
@@ -45,7 +49,7 @@ def stats(db_sess: Session, user: User, app_id: int):
                From (
                     Select Count(id) as c, strftime("%Y-%m-%dT%H:%M", date) as date
                     From Event
-                    Where appCode = :appCode And date Between :start And :end
+                    Where appCode = :appCode And date Between :start And :end And (isNew = :onlyNew Or isNew = 1)
                     Group By strftime("%s", date) / :divider, appUserId
                )
                Group By strftime("%s", date) / :divider
@@ -56,7 +60,7 @@ def stats(db_sess: Session, user: User, app_id: int):
                From (
                     Select Count(id) as c, strftime("%Y-%m-%dT%H:%M", date) as date
                     From Event
-                    Where appCode = :appCode And date Between :start And :end
+                    Where appCode = :appCode And date Between :start And :end And (isNew = :onlyNew Or isNew = 1)
                     Group By strftime("%s", date) / :visitDivider, appUserId
                )
                Group By strftime("%s", date) / :divider
@@ -65,7 +69,7 @@ def stats(db_sess: Session, user: User, app_id: int):
         ("requests",
             """Select Count(id) as c, strftime("%Y-%m-%dT%H:%M", date) as date
                From Event
-               Where appCode = :appCode And date Between :start And :end
+               Where appCode = :appCode And date Between :start And :end And (isNew = :onlyNew Or isNew = 1)
                Group By strftime("%s", date) / :divider
                Order by date ASC
             """),
@@ -77,6 +81,7 @@ def stats(db_sess: Session, user: User, app_id: int):
         "visitDivider": visit_time * 60,
         "start": start.isoformat().replace("T", " "),
         "end": end.isoformat().replace("T", " "),
+        "onlyNew": only_new,
     })
 
     return jsonify(list(map(lambda v: {
@@ -99,6 +104,10 @@ def visitors(db_sess: Session, user: User, app_id: int):
     if app is None:
         return jsonify({"msg": f"app with id [{app_id}] not found"}), 400
 
+    only_new, _ = parse_int(request.args.get("new", None))
+    if only_new != 1:
+        only_new = 0
+
     end, is_date_end = parse_date(request.args.get("end", None))
     start, is_date_start = parse_date(request.args.get("start", None))
 
@@ -108,6 +117,8 @@ def visitors(db_sess: Session, user: User, app_id: int):
           """
     if is_date_end and is_date_start:
         sql += " And date Between :start And :end\n"
+    if only_new:
+        sql += " And isNew = 1\n"
     sql += "Group By appUserId"
 
     sql = "Select Count(c) as c From (" + sql + ")"

@@ -56,16 +56,19 @@ def init_dev(db_sess):
     Permission.new(db_sess, 1, Operations.view_app, 1)
     Permission.new(db_sess, 1, Operations.edit_app, 1)
 
-    now = get_datetime_now()
+    start_d = get_datetime_now() - timedelta(days=2)
     for _ in range(5):
         appUserId = str(uuid4())
-        for t in range(4 * 24):
+        new = True
+        for t in range(2 * 24):
             if random() > 0.05:
                 continue
             for m in range(60):
                 if random() > 0.05:
                     continue
-                event = Event(date=now - timedelta(minutes=t*60+m), actionCode="open", appCode=app.code, appUserId=appUserId)
+                event = Event(date=start_d + timedelta(minutes=t*60+m), actionCode="open", appCode=app.code, appUserId=appUserId)
+                event.isNew = new
+                new = False
                 db_sess.add(event)
 
     db_sess.commit()

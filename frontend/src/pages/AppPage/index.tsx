@@ -31,8 +31,10 @@ export default function AppPage()
 	const statsParams = { group, type: "requests", start: startDate, end: (() => { const date = new Date(endDate); date.setDate(date.getDate() + 1); return date })() } as StatsParams;
 	const stats_requests = useStats(appId, { ...statsParams, type: "requests" });
 	const stats_visitors = useStats(appId, { ...statsParams, type: "visitors" });
+	const stats_visitorsNew = useStats(appId, { ...statsParams, type: "visitors", newVisitors: true });
 	const stats_visits = useStats(appId, { ...statsParams, type: "visits" });
 	const visitors = useStatsVisitors(appId, statsParams);
+	const visitorsNew = useStatsVisitors(appId, { ...statsParams, newVisitors: true });
 
 	function processChartData(queryResult: UseQueryResult<Stats[], unknown>)
 	{
@@ -105,6 +107,7 @@ export default function AppPage()
 				<Chart title="Requests" data={processChartData(stats_requests)} />
 				<Chart title="Visitors" valuesSum={visitors.data} data={processChartData(stats_visitors)} />
 				<Chart title="Visits" data={processChartData(stats_visits)} />
+				<Chart title="New visitors" valuesSum={visitorsNew.data} data={processChartData(stats_visitorsNew)} />
 			</div>
 		</Layout>
 	);

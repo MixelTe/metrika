@@ -24,11 +24,18 @@ def script(db_sess: Session):
     if app_code is None or len(app_code) != 8:
         return jsonify({"msg": "wrong app code"}), 400
 
+    isNew = False
     appUserId = request.cookies.get("userId", None)
     if appUserId is None:
         appUserId = str(uuid4())
+        isNew = True
 
-    Event.new(db_sess, "open", app_code, appUserId)
+    remote_addr = request.remote_addr
+    language = request.accept_languages.to_header()
+    user_agent = request.user_agent.string
+    is_desktop = "Mobi" not in user_agent
+
+    Event.new(db_sess, "open", app_code, appUserId, isNew, remote_addr, language, user_agent, is_desktop)
     db_sess.commit()
 
     res = make_response()

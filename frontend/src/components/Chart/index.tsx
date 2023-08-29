@@ -11,7 +11,13 @@ export default function Chart({ data, title, valuesSum }: ChartProps)
 	const height = 100;
 	const padding = 10;
 	const step = width / (data.length - 1);
-	const dataToPoint = (v: number, i: number) => ({ x: Math.round(i * step + padding), y: Math.round((1 - v / maxV) * height + padding) })
+	const indexToX = (i: number) => Math.round(i * step + padding);
+	const dataToPoint = (v: number, i: number) => ({
+		x: indexToX(i),
+		x1: indexToX(Math.max(i - 0.5, 0)),
+		x2: indexToX(Math.min(i + 0.5, data.length - 1)),
+		y: Math.round((1 - v / maxV) * height + padding)
+	})
 	const points = data.map((v, i) => dataToPoint(v.value, i));
 	const sum = data.reduce((p, v) => p + v.value, 0);
 	const lineTop = { y: dataToPoint(maxV, 0).y, label: maxV };
@@ -40,7 +46,8 @@ export default function Chart({ data, title, valuesSum }: ChartProps)
 					fill="rgba(139, 255, 84, 0.2)"
 					stroke="rgb(139, 197, 84)"
 					strokeWidth={2}
-					d={`M${points.map(p => `${p.x},${p.y}`).join(" L")} L${width + padding},${height + padding * 2} L${padding},${height + padding * 2} L${points[0].x},${points[0].y}`}
+					// d={`M${points.map(p => `${p.x},${p.y}`).join(" L")} L${width + padding},${height + padding * 2} L${padding},${height + padding * 2} L${points[0].x},${points[0].y}`}
+					d={`M${points.map(p => `${p.x1},${p.y}L${p.x2},${p.y}`).join(" L")} L${width + padding},${height + padding * 2} L${padding},${height + padding * 2} L${points[0].x},${points[0].y}`}
 				/>
 				{/* {points.map((p, i) => <circle key={i} cx={p.x} cy={p.y} r={2} fill="#0000ff" />)} */}
 				{cursor >= 0 && <line x1={cursor * step + padding} x2={cursor * step + padding} y1={0} y2={height + padding * 2} strokeWidth={1} stroke="gray" />}
