@@ -8,6 +8,7 @@ import Chart, { ChartData, ChartItem } from "../../components/Chart";
 import { useState } from "react";
 import { UseQueryResult } from "react-query";
 import { dateToInptValue, datetimeToString } from "../../utils/dates";
+import { useTitle } from "../../utils/useTtile";
 
 export default function AppPage()
 {
@@ -28,6 +29,7 @@ export default function AppPage()
 
 	const appId = useParams()["appId"]!;
 	const app = useApp(appId);
+	useTitle([app.data?.name || "App"]);
 	const statsParams = { group, type: "requests", start: startDate, end: (() => { const date = new Date(endDate); date.setDate(date.getDate() + 1); return date })() } as StatsParams;
 	const stats_requests = useStats(appId, { ...statsParams, type: "requests" });
 	const stats_visitors = useStats(appId, { ...statsParams, type: "visitors" });
