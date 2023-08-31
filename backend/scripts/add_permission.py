@@ -6,7 +6,7 @@ def add_permission(login, permission, obj="-1"):
     from data import db_session
     from data import User, Permission
 
-    db_session.global_init("db/Metrika.db")
+    db_session.global_init("db/metrika.db")
     session = db_session.create_session()
     user = session.query(User).filter(User.login == login).first()
     if user is None:

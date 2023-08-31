@@ -6,7 +6,7 @@ def add_user(login, password, name):
     from data import db_session
     from data import User
 
-    db_session.global_init("db/Metrika.db")
+    db_session.global_init("db/metrika.db")
     user = User(login=login, name=name)
     user.set_password(password)
 
