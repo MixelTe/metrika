@@ -28,11 +28,12 @@ app.config["JWT_COOKIE_SAMESITE"] = "Lax"
 jwt_manager = JWTManager(app)
 is_admin_default = False
 
+
 def main():
     if not os.path.exists("db"):
         os.makedirs("db")
-    new_bd = not os.path.exists("db/Metrika.db")
-    db_session.global_init("db/Metrika.db")
+    new_bd = not os.path.exists("db/metrika.db")
+    db_session.global_init("db/metrika.db")
     if new_bd:
         init_values()
     if "dev" not in sys.argv:
