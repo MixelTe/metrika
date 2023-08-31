@@ -8,14 +8,14 @@
 	border-radius: 0.2em;
 }
 
-.hov {
-	height: 1em;
-	width: 100%;
-	display: flex;
-	justify-content: space-between;
-}
 .desc {
 	width: 100%;
-	display: flex;
-	justify-content: space-between;
+	display: grid;
+	grid-template-columns: auto 8em 2em;
+}
+.desc :nth-child(2) {
+	border-right: 1px solid black;
+}
+.desc :nth-child(3) {
+	text-align: end;
 }

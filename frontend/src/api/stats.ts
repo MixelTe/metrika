@@ -14,6 +14,12 @@ export function useStatsVisitors(appId: number | string, params: VisitorsParams)
 
 export interface Stats
 {
+	label: string,
+	values: StatsItem[],
+}
+
+export interface StatsItem
+{
 	count: number,
 	date: string,
 }
@@ -21,7 +27,7 @@ export interface Stats
 export interface StatsParams
 {
 	group: "minute" | "hour" | "day",
-	type: "visitors" | "visits" | "requests",
+	type: "visitors" | "visits" | "requests" | "fromTag",
 	start: Date,
 	end: Date,
 	newVisitors: boolean,

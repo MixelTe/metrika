@@ -31,19 +31,17 @@ def script(db_sess: Session):
     if appUserId is None:
         appUserId = str(uuid4())
         isNew = True
+    else:
+        isNew = db_sess.query(Event).filter(Event.appCode == app_code, Event.appUserId == appUserId).first() is None
 
-    remote_addr = request.remote_addr
-    language = request.accept_languages.to_header()
-    user_agent = request.user_agent.string
-    is_desktop = "Mobi" not in user_agent
-
-    event = Event.new(db_sess, "open", app_code, appUserId, isNew, remote_addr, language, user_agent, is_desktop)
+    event = Event.new(db_sess, "open", app_code, appUserId, isNew)
     db_sess.commit()
 
     script_js = load_file("static/script.js")  # dev
     res = script_js
     res = res.replace("\"%eventId%\"", str(event.id))
     res = res.replace("\"%url%\"", '"' + url_for("docs.docs", _external=True) + '"')
+    res = res.replace("\"%appCode%\"", f'"{app_code}"')
     res = make_response(res)
     res.set_cookie("userId", appUserId, max_age=31536000, samesite="None", secure=True)
     return res
@@ -64,7 +62,7 @@ def script_onopen(db_sess: Session):
     if not is_json:
         return jsonify({"msg": "body is not json"}), 415
 
-    (event_id, from_tag), values_error = get_json_values(data, "eventId", "fromTag")
+    (event_id, from_tag, page), values_error = get_json_values(data, "eventId", "fromTag", "page")
 
     if values_error:
         return jsonify({"msg": values_error}), 400
@@ -81,5 +79,42 @@ def script_onopen(db_sess: Session):
         return jsonify({"msg": "wrong eventId"}), 400
 
     event.fromTag = from_tag
+    event.page = page
     db_sess.commit()
+    return jsonify({"msg": "ok"}), 200
+
+
+@blueprint.route("/api/script/event", methods=["OPTIONS"])
+def script_pagechange_options():
+    g.no_cors = True
+    return "ok"
+
+
+@blueprint.route("/api/script/event", methods=["POST"])
+@use_db_session()
+def script_pagechange(db_sess: Session):
+    g.no_cors = True
+
+    data, is_json = g.json
+    if not is_json:
+        return jsonify({"msg": "body is not json"}), 415
+
+    (app_code, event, from_tag, page), values_error = get_json_values(data, "appCode", "event", "fromTag", "page")
+
+    if values_error:
+        return jsonify({"msg": values_error}), 400
+
+    appUserId = request.cookies.get("userId", None)
+
+    if appUserId is None:
+        return jsonify({"msg": "no userId"}), 400
+
+    if event not in ["page"]:
+        return jsonify({"msg": "wrong event"}), 400
+
+    event = Event.new(db_sess, event, app_code, appUserId, False)
+    event.fromTag = from_tag
+    event.page = page
+    db_sess.commit()
+
     return jsonify({"msg": "ok"}), 200

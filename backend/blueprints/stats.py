@@ -1,4 +1,5 @@
 from datetime import timedelta
+import json
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required
 from sqlalchemy import text
@@ -66,6 +67,25 @@ def stats(db_sess: Session, user: User, app_id: int):
                Group By strftime("%s", date) / :divider
                Order by date ASC
             """),
+        ("fromTag",
+            """Select fromTag, json_group_array(json_object(
+                   'c', c,
+                   'date', date
+               )) as json
+               From (
+                   Select Count(c) as c, date, fromTag
+                   From (
+                       Select Count(id) as c, strftime("%Y-%m-%dT%H:%M", date) as date, appUserId, fromTag
+                       From Event
+                       Where appCode = :appCode And date Between :start And :end And (isNew = :onlyNew Or isNew = 1)
+                       Group By strftime("%s", date) / :divider, appUserId, fromTag
+                   )
+                   Group By strftime("%s", date) / :divider, fromTag
+                   Order by date ASC
+               )
+               Group By fromTag
+               Order by fromTag ASC
+            """),
         ("requests",
             """Select Count(id) as c, strftime("%Y-%m-%dT%H:%M", date) as date
                From Event
@@ -84,14 +104,28 @@ def stats(db_sess: Session, user: User, app_id: int):
         "onlyNew": only_new,
     })
 
-    return jsonify(list(map(lambda v: {
-        "date": switch_value(group, [
-            ("day", v.date[:-5] + "00:00"),
-            ("hour", v.date[:-2] + "00"),
-            ("minute", v.date[:-1] + "0"),
-        ]),
-        "count": v.c,
-    }, events))), 200
+    format_date = switch_value(group, [
+        ("day", lambda date: date[:-5] + "00:00"),
+        ("hour", lambda date: date[:-2] + "00"),
+        ("minute", lambda date: date[:-1] + "0"),
+    ])
+
+    if stats_type == "fromTag":
+        return jsonify(list(map(lambda v: {
+            "label": v.fromTag,
+            "values": list(map(lambda v: {
+                "date": format_date(v["date"]),
+                "count": v["c"],
+            }, json.loads(v.json)))
+        }, filter(lambda v: v.fromTag != "", events)))), 200
+
+    return jsonify([{
+        "label": stats_type,
+        "values": list(map(lambda v: {
+            "date": format_date(v.date),
+            "count": v.c,
+        }, events))
+    }]), 200
 
 
 @blueprint.route("/api/stats/visitors/<int:app_id>")
