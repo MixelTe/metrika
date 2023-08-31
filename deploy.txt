@@ -1,0 +1,12 @@
+wsgi.py: 
+from main import app as application
+--------
+pip3.9 install --user sqlalchemy_serializer
+pip3.9 install --user flask_jwt_extended
+git clone -b gh-pages https://github.com/MixelTe/metrika.git
+---------
+
+cd metrika
+git restore .
+git pull
+python3.9 scripts/change_user_password.py admin

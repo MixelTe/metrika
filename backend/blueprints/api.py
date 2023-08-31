@@ -1,4 +1,5 @@
 from datetime import timedelta
+import sys
 from uuid import uuid4
 from flask import Blueprint, g, jsonify, make_response, request, url_for
 from flask_jwt_extended import jwt_required
@@ -37,7 +38,8 @@ def script(db_sess: Session):
     event = Event.new(db_sess, "open", app_code, appUserId, isNew)
     db_sess.commit()
 
-    script_js = load_file("static/script.js")  # dev
+    if "dev" in sys.argv:
+        script_js = load_file("static/script.js")  # dev
     res = script_js
     res = res.replace("\"%eventId%\"", str(event.id))
     res = res.replace("\"%url%\"", '"' + url_for("docs.docs", _external=True) + '"')
