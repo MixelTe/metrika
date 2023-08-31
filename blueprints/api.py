@@ -39,6 +39,7 @@ def script(db_sess: Session):
     db_sess.commit()
 
     if "dev" in sys.argv:
+        global script_js
         script_js = load_file("static/script.js")  # dev
     res = script_js
     res = res.replace("\"%eventId%\"", str(event.id))
@@ -64,7 +65,7 @@ def script_onopen(db_sess: Session):
     if not is_json:
         return jsonify({"msg": "body is not json"}), 415
 
-    (event_id, from_tag, page), values_error = get_json_values(data, "eventId", "fromTag", "page")
+    (event_id, from_tag, page, params, page_hash), values_error = get_json_values(data, "eventId", "fromTag", "page", "params", "pageHash")
 
     if values_error:
         return jsonify({"msg": values_error}), 400
@@ -82,6 +83,8 @@ def script_onopen(db_sess: Session):
 
     event.fromTag = from_tag
     event.page = page
+    event.params = params
+    event.pageHash = page_hash
     db_sess.commit()
     return jsonify({"msg": "ok"}), 200
 
@@ -101,7 +104,7 @@ def script_pagechange(db_sess: Session):
     if not is_json:
         return jsonify({"msg": "body is not json"}), 415
 
-    (app_code, event, from_tag, page), values_error = get_json_values(data, "appCode", "event", "fromTag", "page")
+    (app_code, event, from_tag, page, params, page_hash), values_error = get_json_values(data, "appCode", "event", "fromTag", "page", "params", "pageHash")
 
     if values_error:
         return jsonify({"msg": values_error}), 400
@@ -117,6 +120,8 @@ def script_pagechange(db_sess: Session):
     event = Event.new(db_sess, event, app_code, appUserId, False)
     event.fromTag = from_tag
     event.page = page
+    event.params = params
+    event.pageHash = page_hash
     db_sess.commit()
 
     return jsonify({"msg": "ok"}), 200

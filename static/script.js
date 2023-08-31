@@ -42,6 +42,8 @@
                 appCode,
                 fromTag: new URL(location.href).searchParams.get("from") || "",
                 page: trimEnd(new URL(location.href).pathname, "/") || "/",
+                params: new URL(location.href).search || "",
+                pageHash: new URL(location.href).hash || "",
             }),
         })
     }
