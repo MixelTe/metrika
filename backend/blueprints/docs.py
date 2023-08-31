@@ -10,7 +10,33 @@ def docs():
         "/api/script": {
             "__desc__": "Get script for web app",
             "__perm__": "None",
+            "params": {
+                "app": "string",
+            },
             "response": "js script",
+        },
+        "/api/onopen": {
+            "__desc__": "Add info to open event",
+            "__perm__": "None",
+            "request": {
+                "eventId": "number",
+                "fromTag": "string",
+                "page": "string",
+                "params": "string",
+                "pageHash": "string",
+            },
+        },
+        "/api/event": {
+            "__desc__": "Send event",
+            "__perm__": "None",
+            "request": {
+                "appCode": "string",
+                "event": "string",
+                "fromTag": "string",
+                "page": "string",
+                "params": "string",
+                "pageHash": "string",
+            },
         },
         "/api/auth POST": {
             "__desc__": "Get auth cookie",
@@ -48,6 +74,28 @@ def docs():
             },
             "response": "App",
         },
+        "/api/stats/<int:app_id>": {
+            "__desc__": "Get statistics",
+            "__perm__": "view_app/<app_id>",
+            "params": {
+                "group": "'minute' | 'hour' | 'day'",
+                "type": "'visitors' | 'visits' | 'requests' | 'fromTag'",
+                "start": "datetime",
+                "end": "datetime",
+                "newVisitors": "boolean",
+            },
+            "response": "Stats[]",
+        },
+        "/api/stats/visitors/<int:app_id>": {
+            "__desc__": "Get visitors count",
+            "__perm__": "view_app/<app_id>",
+            "params": {
+                "start": "datetime",
+                "end": "datetime",
+                "newVisitors": "boolean",
+            },
+            "response": "number",
+        },
         "User": {
             "id": "number",
             "name": "string",
@@ -58,5 +106,12 @@ def docs():
             "id": "number",
             "code": "string",
             "name": "string",
+        },
+        "Stats": {
+            "label": "string",
+            "values": [{
+                "count": "number",
+                "date": "string",
+            }],
         },
     }), 200

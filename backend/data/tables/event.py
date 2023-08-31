@@ -21,6 +21,8 @@ class Event(SqlAlchemyBase, SerializerMixin):
     isDesktop  = Column(Boolean, DefaultClause("1"), nullable=False)
     page       = Column(String(128), DefaultClause(""), nullable=False)
     fromTag    = Column(String(64), DefaultClause(""), nullable=False)
+    params     = Column(String(128), DefaultClause(""), nullable=False)
+    pageHash   = Column(String(64), DefaultClause(""), nullable=False)
 
     def __repr__(self):
         return f"<Event> [{self.id}] {self.date} {self.actionCode}"

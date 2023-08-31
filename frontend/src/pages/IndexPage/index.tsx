@@ -19,7 +19,7 @@ export default function IndexPage()
 			{addApp.isLoading && <Spinner />}
 			<h1>Your Apps</h1>
 			{apps.isError && `${apps.error}`}
-			{apps.data?.map(v => <Link to={"/app/" + v.id}>
+			{apps.data?.map(v => <Link to={"/app/" + v.id} key={v.code}>
 				<div>{v.name}</div>
 				<div>{v.code}</div>
 			</Link>)}
