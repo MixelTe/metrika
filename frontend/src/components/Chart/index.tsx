@@ -59,9 +59,11 @@ export default function Chart({ data, title, valuesSum }: ChartProps)
 				<text x={2} y={lineHalf.y + 12} fontSize={12} >{lineHalf.label}</text>
 				{data.map((v, i) =>
 				{
+					if (v.values.length == 0) return null;
 					const points = v.values.map((v, i) => dataToPoint(v.value, i));
 					const color = colors[i] || colors[0];
 					return <path
+						key={i}
 						fill={color.fill}
 						stroke={color.stroke}
 						strokeWidth={2}
@@ -74,10 +76,10 @@ export default function Chart({ data, title, valuesSum }: ChartProps)
 				{cursor >= 0 && <line x1={cursor * step + padding} x2={cursor * step + padding} y1={0} y2={height + padding * 2} strokeWidth={1} stroke="gray" />}
 			</>}
 		</svg>
-		{data.map(v =>
+		{data.map((v, i) =>
 		{
 			const sum = v.values.reduce((p, v) => p + v.value, 0);
-			return <div className={styles.desc}>
+			return <div key={i} className={styles.desc}>
 				<div>{v.label}</div>
 				<div>{cursor < 0 ? v.avarege && (Math.round(sum / dataLength * 10) / 10 || 0) : v.values[cursor]?.label}</div>
 				<div>{cursor < 0 ? valuesSum || sum || 0 : v.values[cursor]?.value}</div>
