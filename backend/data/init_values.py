@@ -1,5 +1,5 @@
 from datetime import timedelta
-from random import random
+from random import choice, random
 import sys
 from uuid import uuid4
 from data import db_session
@@ -57,17 +57,20 @@ def init_dev(db_sess):
     Permission.new(db_sess, 1, Operations.edit_app, 1)
 
     start_d = get_datetime_now() - timedelta(days=2)
+    tags = ["fire", "water", "fog", "sun", "flower", "", "", ""]
     for _ in range(5):
         appUserId = str(uuid4())
         new = True
         for t in range(2 * 24):
             if random() > 0.05:
                 continue
+            tag = choice(tags)
             for m in range(60):
                 if random() > 0.05:
                     continue
                 event = Event(date=start_d + timedelta(minutes=t*60+m), actionCode="open", appCode=app.code, appUserId=appUserId)
                 event.isNew = new
+                event.fromTag = tag
                 new = False
                 db_sess.add(event)
 
