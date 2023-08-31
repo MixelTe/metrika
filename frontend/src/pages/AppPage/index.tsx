@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import styles from "./styles.module.css"
 import Layout from "../../components/Layout";
 import { useApp } from "../../api/app";
@@ -27,6 +27,7 @@ export default function AppPage()
 	});
 	const [group, setGroup] = useState<StatsParams["group"]>("hour");
 
+	const loc = useLocation();
 	const appId = useParams()["appId"]!;
 	const app = useApp(appId);
 	useTitle([app.data?.name || "App"]);
@@ -118,6 +119,16 @@ export default function AppPage()
 				<Chart title="Visitors" valuesSum={visitors.data} data={processChartData(stats_visitors)} />
 				<Chart title="New visitors" valuesSum={visitorsNew.data} data={processChartData(stats_visitorsNew)} />
 				<Chart title="From tag" data={processChartData(stats_fromTag, false)} />
+			</div>
+			<div>
+				<button onClick={() =>
+				{
+					const url = window.location.host;
+					const script = `<script defer src="https://${url}/api/script?app=${app.data?.code}"></script>`;
+					navigator.clipboard.writeText(script);
+				}}>
+					Copy script
+				</button>
 			</div>
 		</Layout>
 	);
